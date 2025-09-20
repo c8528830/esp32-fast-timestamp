@@ -62,21 +62,21 @@ struct TimeStampTimerG {
     volatile TimeStampTimerG& operator+=(uint32_t us) volatile { time += us; return *this; }
     volatile TimeStampTimerG& operator-=(uint32_t us) volatile { time -= us; return *this; }
 
-    bool operator<(const TimeStampTimerG& o)  const { return cyc_cmp(time, o.time) <  0; }
-    bool operator>(const TimeStampTimerG& o)  const { return cyc_cmp(time, o.time) >  0; }
-    bool operator<=(const TimeStampTimerG& o) const { return cyc_cmp(time, o.time) <= 0; }
-    bool operator>=(const TimeStampTimerG& o) const { return cyc_cmp(time, o.time) >= 0; }
+    bool operator<(const TimeStampTimerG& o)  const { return cmp(time, o.time) <  0; }
+    bool operator>(const TimeStampTimerG& o)  const { return cmp(time, o.time) >  0; }
+    bool operator<=(const TimeStampTimerG& o) const { return cmp(time, o.time) <= 0; }
+    bool operator>=(const TimeStampTimerG& o) const { return cmp(time, o.time) >= 0; }
     bool operator==(const TimeStampTimerG& o) const { return time == o.time; }
     bool operator!=(const TimeStampTimerG& o) const { return time != o.time; } 
 
-    bool operator<(const TimeStampTimerG& o)  const volatile { return cyc_cmp(time, o.time) <  0; }
-    bool operator>(const TimeStampTimerG& o)  const volatile { return cyc_cmp(time, o.time) >  0; }
-    bool operator<=(const TimeStampTimerG& o) const volatile { return cyc_cmp(time, o.time) <= 0; }
-    bool operator>=(const TimeStampTimerG& o) const volatile { return cyc_cmp(time, o.time) >= 0; }
+    bool operator<(const TimeStampTimerG& o)  const volatile { return cmp(time, o.time) <  0; }
+    bool operator>(const TimeStampTimerG& o)  const volatile { return cmp(time, o.time) >  0; }
+    bool operator<=(const TimeStampTimerG& o) const volatile { return cmp(time, o.time) <= 0; }
+    bool operator>=(const TimeStampTimerG& o) const volatile { return cmp(time, o.time) >= 0; }
     bool operator==(const TimeStampTimerG& o) const volatile { return time == o.time; }
     bool operator!=(const TimeStampTimerG& o) const volatile { return time != o.time; }
     
-    static inline int32_t cyc_cmp(uint32_t a, uint32_t b) { return (int32_t)(a - b); }
+    static inline int32_t cmp(uint32_t a, uint32_t b) { return (int32_t)(a - b); }
 
     static inline uint32_t Micros() {
         TIMG0_T0UPDATE_REG = 1;
@@ -97,4 +97,5 @@ struct TimeStampTimerG {
     }
 
 };
+
 
