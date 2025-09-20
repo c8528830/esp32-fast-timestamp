@@ -58,6 +58,7 @@ void FreeLoopTask(void* pvParameters);
 void setup() {
     Serial.begin(115200);
     TimeStampMicros::SyncCpuHzFromIDF();
+    TimeStampNanos::SyncCpuHzFromIDF();
     SpeedTest();
     xTaskCreatePinnedToCore(FreeLoopTask, "FreeLoopTask", 5120, nullptr, configMAX_PRIORITIES - 1, nullptr, 1); //Use Core 1
 }

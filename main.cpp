@@ -7,6 +7,7 @@ void FreeLoopTask(void* pvParameters);
 void setup() {
     Serial.begin(115200);
     TimeStampMicros::SyncCpuHzFromIDF();
+    TimeStampNanos::SyncCpuHzFromIDF();
     SpeedTest();
     xTaskCreatePinnedToCore(FreeLoopTask, "FreeLoopTask", 5120, nullptr, configMAX_PRIORITIES - 1, nullptr, 1); //Use Core 1
 }
@@ -48,7 +49,7 @@ void SpeedTest() {
         currentTime = TimeStampMicros::Now(); // or currentTime.Refresh();
     }
     int64_t elapsed = speedTimer.Diff();
-    ESP_LOGI(TAG, "Time get new use %lld ns.", elapsed / 10000);
+    ESP_LOGI(TAG, "Time get new use %lld ns.", elapsed / 10000); //SpeedTest: Time get new use 96 ns.
     
     TimeStampMicros diffTime = TimeStampMicros::Now();
     speedTimer.Refresh();
@@ -58,7 +59,7 @@ void SpeedTest() {
         }
     }
     elapsed = speedTimer.Diff();
-    ESP_LOGI(TAG, "operator(-) use %lld ns.", elapsed / 10000);
+    ESP_LOGI(TAG, "operator(-) use %lld ns.", elapsed / 10000); //operator(-) use 4 ns.
 
 
     ESP_LOGI(TAG, "CurrentTime: %lu PreventOptimization: %d", currentTime, preventOptimization);
