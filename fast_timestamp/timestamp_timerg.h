@@ -47,7 +47,6 @@ struct TimeStampTimerG {
     TimeStampTimerG& operator=(uint32_t micros) { time = micros; return *this; }
     volatile TimeStampTimerG& operator=(uint32_t micros) volatile { time = micros; return *this; }
 
-    // 從同型別指派
     TimeStampTimerG& operator=(const TimeStampTimerG& o) { time = o.time; return *this; }
     volatile TimeStampTimerG& operator=(const TimeStampTimerG& o) volatile { time = o.time; return *this; }
 
@@ -58,7 +57,6 @@ struct TimeStampTimerG {
     int32_t Diff() { return (int32_t)(Micros() - time); }
 
 
-    // ---- 以「微秒」為單位的加減 ----
     TimeStampTimerG& operator+=(uint32_t us) { time += us; return *this; }
     TimeStampTimerG& operator-=(uint32_t us) { time -= us; return *this; }
 
@@ -70,7 +68,7 @@ struct TimeStampTimerG {
     bool operator<=(const TimeStampTimerG& o) const { return cyc_cmp(time, o.time) <= 0; }
     bool operator>=(const TimeStampTimerG& o) const { return cyc_cmp(time, o.time) >= 0; }
     bool operator==(const TimeStampTimerG& o) const { return time == o.time; }
-    bool operator!=(const TimeStampTimerG& o) const { return time != o.time; } // ← 修正了原本的邏輯錯誤
+    bool operator!=(const TimeStampTimerG& o) const { return time != o.time; } 
 
     bool operator<(const TimeStampTimerG& o)  const volatile { return cyc_cmp(time, o.time) <  0; }
     bool operator>(const TimeStampTimerG& o)  const volatile { return cyc_cmp(time, o.time) >  0; }
@@ -98,4 +96,5 @@ struct TimeStampTimerG {
         TIMG0_T0LOAD_REG = 1;
         TIMG0_T0CONFIG_REG = (divider << 13) | (1 << 31) | (1 << 30);
     }
+
 };
