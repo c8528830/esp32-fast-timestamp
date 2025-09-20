@@ -1,6 +1,9 @@
 # esp32-fast-timestamp
-ESP32 Fast timestamp, Micros Nanos measure library. A high-resolution timestamp library for ESP32, providing microsecond and nanosecond precision using the CPU cycle counter.
+`ESP32 Fast Timestamp – Micros / Nanos Measurement Library.`
+---
+A high-resolution timestamp library for ESP32, providing microsecond and nanosecond precision using the CPU cycle counter.
 On ESP32 at 240 MHz, a single timestamp acquisition (Now()) takes only ~90 ns (≈ 20 CPU cycles).
+
 
 When disabling the watchdog and running a delay-free loop is very helpful for precise timing control.
 
@@ -8,9 +11,18 @@ A high-resolution timestamp library for ESP32, providing
 microsecond and nanosecond precision using the CPU cycle counter.
 
 - 🚀 Ultra-fast: reads directly from `xthal_get_ccount()`
-- ⏱️ Provides both `FastTimestampMicros` and `FastTimestampNanos`
-- 🔄 Wrap-safe difference calculation
-- ⚡ Supports operator overloading
+- ⏱️ Provides both `TimestampMicros` and `TimestampNanos`
+- 🔄 Wrap-safe difference calculation (handles 32-bit cycle counter overflow)
+- ⚡ Supports operator overloading (-, +, comparisons, assignment)
+- 🔧 Refresh(), Reset(), Diff() methods for convenient usage
+
+---
+| Method                   | Resolution | Avg. Call Overhead (240 MHz) |
+| ------------------------ | ---------- | ---------------------------- |
+| `TimeStampMicros::Now()` | 1 µs       | \~90–100 ns (\~20–24 cycles) |
+| `TimeStampNanos::Now()`  | 4.17 ns    | \~90–100 ns (\~20–24 cycles) |
+| `operator-` (diff calc)  | 1 µs / ns  | \~4 ns (≈1 cycle)            |
+| `esp_timer_get_time()`   | 1 µs       | \~1050 ns (≈250 cycles)      |
 
 How to use
 ---
@@ -93,7 +105,9 @@ void SpeedTest() {
     ESP_LOGI(TAG, "Start.");
     TimeStampNanos speedTimer;
     TimeStampMicros currentTime;
-    int preventOptimization = 0;
+    int preventOptimization1 = 0;
+    int64_t preventOptimization2 = 0;
+    int64_t preventOptimization3 = 0;
 
     speedTimer.Refresh();
     for(int i = 0; i < 10000; i++) {
@@ -105,33 +119,40 @@ void SpeedTest() {
     TimeStampMicros diffTime = TimeStampMicros::Now();
     speedTimer.Refresh();
     for(int i = 0; i < 10000; i++) {
-        if(diffTime - currentTime > 500) {
-            preventOptimization = i;
+        if(diffTime - currentTime < 500) {
+            preventOptimization1 = i;
         }
     }
     elapsed = speedTimer.Diff();
     ESP_LOGI(TAG, "operator(-) use %lld ns.", elapsed / 10000); //operator(-) use 4 ns.
 
+    speedTimer.Refresh();
+    for(int i = 0; i < 10000; i++) {
+        preventOptimization2 = esp_timer_get_time();  // it's same millis() or micros();
+    }
+    elapsed = speedTimer.Diff();
+    ESP_LOGI(TAG, "esp_timer_get_time use %lld ns.", elapsed / 10000); //esp_timer_get_time use 1075 ns.[0m
 
-    ESP_LOGI(TAG, "CurrentTime: %lu PreventOptimization: %d", currentTime, preventOptimization);
+    ESP_LOGI(TAG, "CurrentTime: %lu PreventOptimization1: %d PreventOptimization2: %lld", currentTime, preventOptimization1, preventOptimization2);
 }
+
 
 ```
 
 Output
 ---
 ```
-[0;32mI (692) SpeedTest: Time get new use 96 ns.[0m
-[0;32mI (692) SpeedTest: operator(-) use 4 ns.[0m
-[0;32mI (692) SpeedTest: CurrentTime: 1070514176 PreventOptimization: 0[0m
+[0;32mI (692) SpeedTest: Time get new use 97 ns.[0m
+[0;32mI (692) SpeedTest: operator(-) use 0 ns.[0m
 [0;32mI (688) main_task: Returned from app_main()[0m
-[0;32mI (699) FreeLoopTask: Task Start. Micros:430480[0m
-[0;32mI (1209) FreeLoopTask: Timer_1 target. Micros:940500[0m
-[0;32mI (1709) FreeLoopTask: Timer_1 target. Micros:1440500[0m
-[0;32mI (2209) FreeLoopTask: Timer_1 target. Micros:1940501[0m
-[0;32mI (2709) FreeLoopTask: Timer_1 target. Micros:2440502[0m
-[0;32mI (3209) FreeLoopTask: Timer_1 target. Micros:2940502[0m
-[0;32mI (3709) FreeLoopTask: Timer_1 target. Micros:3440502[0m
-[0;32mI (4209) FreeLoopTask: Timer_1 target. Micros:3940503[0m
+[0;32mI (703) SpeedTest: esp_timer_get_time use 1062 ns.[0m
+[0;32mI (703) SpeedTest: CurrentTime: 1070514176 PreventOptimization1: 9999 PreventOptimization2: 434277[0m
+[0;32mI (712) FreeLoopTask: Task Start. Micros:443702[0m
+[0;32mI (1217) FreeLoopTask: Timer_1 target. Micros:948828[0m
+[0;32mI (1717) FreeLoopTask: Timer_1 target. Micros:1448828[0m
+[0;32mI (2217) FreeLoopTask: Timer_1 target. Micros:1948829[0m
+[0;32mI (2717) FreeLoopTask: Timer_1 target. Micros:2448829[0m
+[0;32mI (3217) FreeLoopTask: Timer_1 target. Micros:2948830[0m
+[0;32mI (3717) FreeLoopTask: Timer_1 target. Micros:3448830[0m
 
 ```

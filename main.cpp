@@ -42,7 +42,9 @@ void SpeedTest() {
     ESP_LOGI(TAG, "Start.");
     TimeStampNanos speedTimer;
     TimeStampMicros currentTime;
-    int preventOptimization = 0;
+    int preventOptimization1 = 0;
+    int64_t preventOptimization2 = 0;
+    int64_t preventOptimization3 = 0;
 
     speedTimer.Refresh();
     for(int i = 0; i < 10000; i++) {
@@ -54,13 +56,19 @@ void SpeedTest() {
     TimeStampMicros diffTime = TimeStampMicros::Now();
     speedTimer.Refresh();
     for(int i = 0; i < 10000; i++) {
-        if(diffTime - currentTime > 500) {
-            preventOptimization = i;
+        if(diffTime - currentTime < 500) {
+            preventOptimization1 = i;
         }
     }
     elapsed = speedTimer.Diff();
     ESP_LOGI(TAG, "operator(-) use %lld ns.", elapsed / 10000); //operator(-) use 4 ns.
 
+    speedTimer.Refresh();
+    for(int i = 0; i < 10000; i++) {
+        preventOptimization2 = esp_timer_get_time();  // it's same millis() or micros();
+    }
+    elapsed = speedTimer.Diff();
+    ESP_LOGI(TAG, "esp_timer_get_time use %lld ns.", elapsed / 10000); //esp_timer_get_time use 1075 ns.[0m
 
-    ESP_LOGI(TAG, "CurrentTime: %lu PreventOptimization: %d", currentTime, preventOptimization);
+    ESP_LOGI(TAG, "CurrentTime: %lu PreventOptimization1: %d PreventOptimization2: %lld", currentTime, preventOptimization1, preventOptimization2);
 }
