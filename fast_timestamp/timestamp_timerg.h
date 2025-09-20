@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-#include "esp_private/esp_clk.h"  // for esp_clk_cpu_freq()
 
 #if CONFIG_IDF_TARGET_ESP32S3
 #define TIMG0_T0CONFIG_REG (*(volatile unsigned *)(0x6001F000)) // configuration register
@@ -98,3 +97,4 @@ struct TimeStampTimerG {
     }
 
 };
+
